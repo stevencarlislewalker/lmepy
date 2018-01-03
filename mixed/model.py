@@ -1,8 +1,10 @@
 import numpy as np
 import scipy.special
+import functools
+from scipy.sparse import coo_matrix
 
 
-class Mer:
+class MixedModel:
 	def __init__(
 		self,
 		response_vector,
@@ -84,8 +86,8 @@ class Mer:
 	def number_covariance_parameters_per_term(self):
 		"""number of covariance parameters for each random effects term"""
 		return {
-			scipy.special.binom(
-				self.number_raw_random_effects_columns_per_term[term],
+			term: scipy.special.binom(
+				self.number_raw_random_effects_columns_per_term[term] + 1,
 				2
 			)
 			for term
@@ -95,4 +97,27 @@ class Mer:
 	@property
 	def number_covariance_parameters(self):
 		"""number of covariance parameters"""
-		return sum(self.number_covariance_parameters_per_term)
+		return sum(self.number_covariance_parameters_per_term.values())
+
+	@functools.lru_cache()
+	def grouping_factor_matrices(self):
+		return {
+			term: coo_matrix(
+				(
+					np.repeat(
+						[1],
+						self.number_samples
+					),
+					(
+						list(range(self.number_samples)),
+						self.grouping_factor_indices[term]
+					)
+				),
+				shape=(
+					self.number_samples,
+					self.number_grouping_factor_levels_per_term[term]
+				)
+			).tocsr()
+			for term
+			in self.grouping_factor_indices
+		}
