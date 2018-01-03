@@ -5,12 +5,31 @@ from scipy.sparse import coo_matrix
 
 
 class MixedModel:
+	"""
+	Mixed model object
+
+	:param response_vector: 1-d numpy array with _n_ response values.
+
+	:param fixed_effects_matrix: 2-d numpy array containing an _n_-by-_p_
+	fixed effects model matrix.
+
+	:param raw_random_effects_matrices: length-_k_ dictionary with the
+	_i_th key giving the name of the _i_th random effects term, and the
+	_i_th value giving a 2-d numpy array containing the _n_-by-_pi_ raw
+	random effects model matrix for the _i_th term.
+
+	:param grouping_factor_indices: length-_k_ dictionary with the _i_th
+	key giving the name of the _i_th random effects term, and the _i_th
+	value giving a 1-d numpy array with _n_ integers between 0 and _il_-1.
+	these integers provide labels for the grouping factors associated
+	with the _i_th random effects term.
+	"""
 	def __init__(
-		self,
-		response_vector,
-		fixed_effects_matrix,
-		raw_random_effects_matrices,
-		grouping_factor_indices
+			self,
+			response_vector,
+			fixed_effects_matrix,
+			raw_random_effects_matrices,
+			grouping_factor_indices
 	):
 		self._response_vector = response_vector  # type: np.ndarray
 		self._fixed_effects_matrix = fixed_effects_matrix  # type: np.ndarray
@@ -55,7 +74,7 @@ class MixedModel:
 			term: self.raw_random_effects_matrices[term].shape[1]
 			for term
 			in self.raw_random_effects_matrices
-		}
+			}
 
 	@property
 	def number_grouping_factor_levels_per_term(self):
@@ -64,7 +83,7 @@ class MixedModel:
 			term: np.unique(self.grouping_factor_indices[term]).size
 			for term
 			in self.grouping_factor_indices
-		}
+			}
 
 	@property
 	def number_random_effects_columns_per_term(self):
@@ -75,7 +94,7 @@ class MixedModel:
 				self.number_grouping_factor_levels_per_term[term]
 			for term
 			in self.grouping_factor_indices
-		}
+			}
 
 	@property
 	def number_random_effects_columns(self):
@@ -92,7 +111,7 @@ class MixedModel:
 			)
 			for term
 			in self.number_raw_random_effects_columns_per_term
-		}
+			}
 
 	@property
 	def number_covariance_parameters(self):
@@ -120,4 +139,4 @@ class MixedModel:
 			).tocsr()
 			for term
 			in self.grouping_factor_indices
-		}
+			}
